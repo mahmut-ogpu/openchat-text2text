@@ -17,7 +17,7 @@ def publish_encryption_service():
         imageEnvs=ogpu.client.ImageEnvironments(
             # You need to upload your docker-compose file to a public URL
             # For now using a placeholder - you'll need to replace this
-            cpu="https://raw.githubusercontent.com/mahmut-ogpu/openchat-text2text/main/docker-compose/encryption-cpu.yml"
+            cpu="https://raw.githubusercontent.com/mahmut-ogpu/openchat-text2text/open-chat-encryption/docker-compose/encryption-cpu.yml"
         ),
         minPayment=Web3.to_wei(0.001, "ether"),  # Same as text2text service
         minAvailableLockup=Web3.to_wei(0, "ether"),
