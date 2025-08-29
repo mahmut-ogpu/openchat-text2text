@@ -1,0 +1,14 @@
+services:
+  openchat-encryption-service:
+    image: candnckyc/openchat-encryption:latest
+    pull_policy: always
+    ports:
+      - "5555:5555"
+    environment:
+      - AES_ENCRYPTION_KEY=${AES_ENCRYPTION_KEY}
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
