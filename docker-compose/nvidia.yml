@@ -17,6 +17,21 @@ services:
               count: all
               capabilities: [gpu]
 
+  openchat-encryption-service:
+    image: opengpunetwork/openchat-encryption:latest
+    pull_policy: always
+    ports:
+      - "5556:5555"
+    environment:
+      - AES_ENCRYPTION_KEY=${AES_ENCRYPTION_KEY}
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5555/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   openchat-t2t-service:
     image: opengpunetwork/openchat-text2text:latest@sha256:daf5714a1f8f2b9031d9ed62ffb4cd3763e5ff2bf1063cb58f7b5d90362e4c5e
     pull_policy: always
@@ -27,8 +42,10 @@ services:
     environment:
       - CALLBACK_URL=${CALLBACK_URL}
       - OLLAMA_HOST=http://host.docker.internal:12436
+      - ENCRYPTION_SERVICE_URL=http://openchat-encryption-service:5555
     depends_on:
       - openchat-ollama-service
+      - openchat-encryption-service
     networks:
       - app_network
 
