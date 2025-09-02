@@ -1,0 +1,50 @@
+services:
+
+  openchat-ollama-service:
+    image: ollama/ollama:latest
+    pull_policy: always
+    volumes:
+      - ollama_models:/root/.ollama
+    networks:
+      - app_network
+
+  openchat-encryption-service:
+    image: candnckyc/openchat-encryption:latest
+    pull_policy: always
+    ports:
+      - "5556:5555"  # External access on port 5556
+    environment:
+      - AES_ENCRYPTION_KEY=${AES_ENCRYPTION_KEY}
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import requests; requests.get(\"http://localhost:5555/docs\")' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  openchat-t2t-service:
+    image: docker.io/library/text2text-integrated:latest
+    pull_policy: never
+    ports:
+      - "${PORT:-5555}:5555"  # External access
+    environment:
+      - CALLBACK_URL=${CALLBACK_URL:-http://localhost:5555/callback}
+      - OLLAMA_HOST=http://openchat-ollama-service:11434
+      - ENCRYPTION_SERVICE_URL=http://openchat-encryption-service:5555
+    depends_on:
+      openchat-encryption-service:
+        condition: service_healthy
+      openchat-ollama-service:
+        condition: service_started
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  ollama_models:
+    driver: local
